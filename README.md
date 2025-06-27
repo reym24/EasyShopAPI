@@ -1,62 +1,69 @@
-# EasyShop E-Commerce API
+# EasyShop API - E-Commerce Backend
 
-This project is a backend Spring Boot API for **EasyShop**, an online e-commerce website. The goal was not just to build new features, but also to **fix critical bugs and ensure the application was production-ready.**
-
-This capstone was completed as part of the YearUp Java Development program.
+This repository contains the backend API for EasyShop, a full-featured e-commerce web application built using Spring Boot. The project was developed during the YearUp Java Development capstone and focuses on both building new features and resolving critical application issues.
 
 ---
 
-## 📚 Project Overview
+## 🔍 Project Description
 
-EasyShop is an online store where users can:
-- browse products by category,
-- search and filter products,
-- manage a shopping cart,
-- and update their user profile.
+EasyShop serves as an online retail platform that allows customers to:
 
-Before this project could be deployed to production, there were several key issues to solve:
-- **Users had reported that the product search functionality was returning incorrect results.** The search API uses parameters like categoryId, minPrice, maxPrice, and color, but combinations of these often produced no results even when matching products existed.
-- **Users also noticed duplicate products.** For example, the same laptop might appear three times with slightly different descriptions or prices. This happened because editing a product was incorrectly inserting new rows instead of updating existing records.
+- Browse and filter products
+- View items by category
+- Manage shopping cart contents
+- Edit personal account information
 
-My task was to:
-✅ identify and fix these bugs,  
-✅ implement new features, and  
-✅ ensure the API was ready for production use.
+Before final deployment, the project required fixing major bugs and implementing essential features to ensure system reliability and completeness.
 
 ---
 
-## 🚀 How to Run the Project
+## ✅ Key Fixes and Enhancements
 
-1. **Clone the repository:**
+**Resolved Issues:**
 
-    ```bash
-    git clone https://github.com/your-username/easyshop-api.git
-    cd easyshop-api
-    ```
+- 🛠️ *Broken Product Search:* Previously, combining filters like category, price, or color yielded no results even when valid matches existed. The query logic in the data layer was redesigned for accuracy.
+- 🛠️ *Duplicate Products on Update:* Editing a product mistakenly created new entries. This was fixed by replacing `INSERT` with `UPDATE` operations and ensuring proper handling in the DAO and frontend.
 
-2. **Set up the database:**
+**Features Added:**
 
-   - Open MySQL Workbench
-   - Run the `create_database.sql` script found in the database folder
-   - This creates the `easyshop` database with tables and sample data
-
-3. **Run the application:**
-
-    ```bash
-    mvn spring-boot:run
-    ```
-
-4. **Access the API:**
-
-    ```
-    http://localhost:8080
-    ```
+- CRUD operations for categories
+- Shopping cart logic tied to authenticated users
+- User profile management endpoints
+- Full JWT authentication for secure routes
 
 ---
 
-## 🔑 Authentication
+## 🚀 Getting Started
 
-The API uses JWT authentication for all protected endpoints.
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/easyshop-api.git
+cd easyshop-api
+```
+
+### 2. Set Up the Database
+
+- Launch MySQL Workbench or another tool
+- Execute the `create_database.sql` script in the `database/` folder
+
+### 3. Start the Server
+
+```bash
+mvn spring-boot:run
+```
+
+Server will be live at:
+
+```
+http://localhost:8080
+```
+
+---
+
+## 🔐 Authentication
+
+EasyShop uses JWT-based authentication.
 
 ### Register
 
@@ -84,185 +91,97 @@ Content-Type: application/json
 }
 ```
 
-On successful login, you’ll receive a JWT token. Add this token to the `Authorization` header for all future requests:
+Save the token from the response and include it in requests:
 
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <your_token_here>
 ```
 
-**Default demo users in the database:**
-- user
-- admin
-- george
+**Default credentials:**
 
-All use the password **password** by default.
+- Username: `user`, `admin`, `george`
+- Password: `password`
 
 ---
 
-## 📂 Categories Endpoints
+## 📁 API Endpoints
 
-Categories were implemented as part of this project to support product browsing and management.
+### 🗂️ Categories
 
-- **Get all categories**
+```http
+GET /categories
+GET /categories/{id}
+POST /categories
+PUT /categories/{id}
+DELETE /categories/{id}
+```
 
-    ```
-    GET /categories
-    ```
+### 🛒 Shopping Cart (Authenticated)
 
-  Example response:
+```http
+GET /cart
+POST /cart/products/{productId}
+PUT /cart/products/{productId}     // Body: { "quantity": 2 }
+DELETE /cart
+```
 
-    ```json
-    [
-      {
-        "categoryId": 1,
-        "name": "Electronics",
-        "description": "Devices and gadgets"
-      },
-      {
-        "categoryId": 2,
-        "name": "Home",
-        "description": "Home and kitchen products"
-      }
-    ]
-    ```
+### 👤 User Profile
 
-- **Get a category by ID**
+```http
+GET /profile
+PUT /profile
+```
 
-    ```
-    GET /categories/{id}
-    ```
-
-- **Create a new category**
-
-    ```
-    POST /categories
-    Body:
-    {
-      "name": "Sports",
-      "description": "Sports equipment and apparel"
-    }
-    ```
-
-- **Update an existing category**
-
-    ```
-    PUT /categories/{id}
-    Body:
-    {
-      "name": "Updated Name",
-      "description": "Updated description"
-    }
-    ```
-
-- **Delete a category**
-
-    ```
-    DELETE /categories/{id}
-    ```
-
-## 🛒 Shopping Cart Endpoints
-
-Implemented as part of this capstone project. Only available to logged-in users.
-
-- **View Shopping Cart**
-
-    ```
-    GET /cart
-    ```
-
-- **Add Product to Cart**
-
-    ```
-    POST /cart/products/{productId}
-    ```
-
-- **Update Quantity of Product in Cart**
-
-    ```
-    PUT /cart/products/{productId}
-    Body: { "quantity": 3 }
-    ```
-
-- **Clear Shopping Cart**
-
-    ```
-    DELETE /cart
-    ```
-
-Example JSON response:
-
+Update payload:
 ```json
 {
-  "items": {
-    "15": {
-      "product": {
-        "productId": 15,
-        "name": "External Hard Drive",
-        "price": 129.99,
-        "categoryId": 1,
-        "description": "Expand your storage capacity and backup your files.",
-        "color": "Gray",
-        "stock": 25,
-        "imageUrl": "external-hard-drive.jpg",
-        "featured": true
-      },
-      "quantity": 1,
-      "discountPercent": 0,
-      "lineTotal": 129.99
-    }
-  },
-  "total": 129.99
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "555-1234",
+  "address": "123 Main St"
 }
 ```
 
 ---
 
-## 👤 User Profile Endpoints
-
-When a user registers, a profile is automatically created. Users can view and edit their profile details:
-
-- **View User Profile**
-
-    ```
-    GET /profile
-    ```
-
-- **Update User Profile**
-
-    ```
-    PUT /profile
-    Body:
-    {
-      "firstName": "John",
-      "lastName": "Doe",
-      "phone": "555-1234",
-      "address": "123 Main St"
-    }
-    ```
-
----
-
-## 🐛 Bugs Fixed
-
-✅ **Product Search Bug Fixed**  
-The original product search was returning incorrect results due to flawed SQL logic. I rewrote the SQL and parameter handling in the DAO layer so filters like category, price, and color now work correctly—even when left blank.
-
-✅ **Duplicate Product Bug Fixed**  
-Previously, editing a product incorrectly inserted a new row rather than updating the existing record. I fixed this by:
-- replacing INSERT statements with proper SQL UPDATE logic in the Product DAO
-- confirming that the frontend uses PUT requests instead of POST when updating products
-
----
-
 ## 🧪 Testing with Postman
 
-The API is thoroughly tested using Postman. Provided Postman collections include:
+The repository includes two Postman collections:
+
 - `easyshop.postman_collection.json`
 - `easyshop-optional.postman_collection.json`
 
-To test:
-1. Import the collection into Postman.
-2. Run individual requests or full test suites.
-3. Include your JWT token in the `Authorization` header for all protected routes.
+Steps:
+
+1. Import into Postman.
+2. Run endpoints individually or test suites.
+3. Insert JWT tokens under the `Authorization` header.
 
 ---
+
+## 🛠️ Tech Requirements
+
+- Java 17+
+- Spring Boot
+- MySQL Server
+- Postman for API testing
+
+---
+
+## 🖼️ Screenshots
+
+### ✔️ Postman Collection
+
+![Postman Tests Screenshot](screenshots/postman-tests.png)
+
+---
+
+## 📈 Next Steps
+
+A potential future addition is **checkout functionality**, including order finalization and payment integration.
+
+---
+
+## 📄 License
+
+MIT License
