@@ -1,4 +1,4 @@
-package org.yearup.controllers;Add commentMore actions
+package org.yearup.controllers;More actions
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,9 +27,8 @@ public class ShoppingCartController
     private ProductDao productDao;
 
 
-
     @GetMapping
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     // each method in this controller requires a Principal object as a parameter
     public ShoppingCart getCart(Principal principal)
     {
@@ -42,7 +41,7 @@ public class ShoppingCartController
             int userId = user.getId();
 
             // use the shoppingcartDao to get all items in the cart and return the cart
-            return null;
+            return shoppingCartDao.getByUserId(userId);
         }
         catch(Exception e)
         {
@@ -54,57 +53,74 @@ public class ShoppingCartController
     // https://localhost:8080/cart/products/15 (15 is the productId to be added
     @PostMapping("products/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ShoppingCartItem addProductToCart(@RequestBody Product product) {
+        public ShoppingCartItem addProductToCart(@RequestBody Product product, Principal principal) {
 
-        try
-        {
-            return shoppingCartDao.create(product);
+            try
+            {
+                // get the currently logged-in username
+                String userName = principal.getName();
+                // find database user by userId
+                User user = userDao.getByUserName(userName);
+                int userId = user.getId();
+
+                return shoppingCartDao.create(product);
+            }
+            catch(Exception ex)
+            {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            }
         }
-        catch(Exception ex)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+
+
+        // add a PUT method to update an existing product in the cart - the url should be
+        // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
+        // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
+        @PutMapping("products/{id}")
+        @PreAuthorize("hasRole('ROLE_ADMIN')")
+            public void updateShoppingCart(@PathVariable Product product, Principal principal){
+                // update the shopping cart by id
+                try
+                {
+                    // get the currently logged-in username
+                    String userName = principal.getName();
+                    // find database user by userId
+                    User user = userDao.getByUserName(userName);
+                    int userId = user.getId();
+
+                    shoppingCartDao.update(userId, product);
+                }
+                catch(Exception ex)
+                {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+                }
+            }
+
+
+            // add a DELETE method to clear all products from the current users cart
+            // https://localhost:8080/cart
+            @DeleteMapping
+            @PreAuthorize("hasRole('ROLE_ADMIN')")
+            public void deleteShoppingCart(Principal principal)
+            {
+                // delete the shopping cart by user id
+                try
+                {
+                    // get the currently logged-in username
+                    String userName = principal.getName();
+                    // find database user by userId
+                    User user = userDao.getByUserName(userName);
+                    int userId = user.getId();
+
+                    var category = shoppingCartDao.getByUserId(userId);
+
+                    if(category == null)
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+                    shoppingCartDao.delete(userId);
+                }
+                catch(Exception ex)
+                {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+                }
+            }
         }
-    }
-
-
-    // add a PUT method to update an existing product in the cart - the url should be
-    // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
-    // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
-    @PutMapping("products/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateShoppingCart(@PathVariable int userId, Product product){
-        // update the shopping cart by id
-        try
-        {
-            shoppingCartDao.update(userId, product);
-        }
-        catch(Exception ex)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
-        }
-    }
-
-
-    // add a DELETE method to clear all products from the current users cart
-    // https://localhost:8080/cart
-    @DeleteMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteShoppingCart(@PathVariable int userId)
-    {
-        // delete the shopping cart by user id
-        try
-        {
-            var category = shoppingCartDao.getByUserId(userId);
-
-            if(category == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        }
-        shoppingCartDao.delete(userId);
-    }
-        catch(Exception ex)
-    {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
-    }
-}
-    }

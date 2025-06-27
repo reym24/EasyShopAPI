@@ -57,11 +57,12 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
         // get category by id
         String query = """
                 select
-                categoryId,
-                categoryName
+                category_Id,
+                Name,
+                description
                 from
                 categories
-                where categoryId = ?
+                where category_Id = ?
                 """;
 
         try(
@@ -73,8 +74,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
                 while (resultSet.next()){
                     String categoryName = resultSet.getString(2);
                     String description = resultSet.getString(3);
-                    Category c = new Category(categoryId, categoryName, description);
-                    return c;
+                    return new Category(categoryId, categoryName, description);
                 }
             }
 
@@ -83,107 +83,106 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
         }
         return null;
     }
-}
 
-@Override
-public Category create(Category category)
-{
-    // create a new category
+    @Override
+    public Category create(Category category)
+    {
+        // create a new category
 
-    String query = """
+        String query = """
                 insert into categories
                 (category_id, name, description)
                 values
                 (1, ?, ?)""";
 
-    try(
-            Connection connection = getConnection();
-            PreparedStatement ps = connection.prepareStatement(query);
-    ) {
-        ps.setInt(1, category.getCategoryId());
-        ps.setString(2, category.getName());
-        ps.setString(3, category.getDescription());
+        try(
+                Connection connection = getConnection();
+                PreparedStatement ps = connection.prepareStatement(query);
+        ) {
+            ps.setInt(1, category.getCategoryId());
+            ps.setString(2, category.getName());
+            ps.setString(3, category.getDescription());
 
-        // get back num of rows
-        int rows = ps.executeUpdate();
-        try(ResultSet resultSet = ps.getGeneratedKeys()) {
-            while (resultSet.next()) {
-                Category result = new Category();
-                result.setCategoryId(resultSet.getInt(1));
-                result.setName(category.getName());
-                result.setDescription(category.getDescription());
+            // get back num of rows
+            int rows = ps.executeUpdate();
+            try(ResultSet resultSet = ps.getGeneratedKeys()) {
+                while (resultSet.next()) {
+                    Category result = new Category();
+                    result.setCategoryId(resultSet.getInt(1));
+                    result.setName(category.getName());
+                    result.setDescription(category.getDescription());
 
-                return result;
+                    return result;
+                }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-    } catch (SQLException e) {
-        throw new RuntimeException(e);
+
+        return null;
     }
 
-    return null;
-}
-
-@Override
-public void update(int categoryId, Category category)
-{
-    // update category
-    String sql = """
+    @Override
+    public void update(int categoryId, Category category)
+    {
+        // update category
+        String sql = """
                 UPDATE categories
                 SET name = ?
                   , description = ?
                 WHERE category_id = ?
                 """;
 
-    try (Connection connection = getConnection())
-    {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, category.getCategoryId());
-        ps.setString(2, category.getName());
-        ps.setString(3, category.getDescription());
+        try (Connection connection = getConnection())
+        {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, category.getCategoryId());
+            ps.setString(2, category.getName());
+            ps.setString(3, category.getDescription());
 
-        ps.executeUpdate();
+            ps.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
-    catch (SQLException e)
-    {
-        throw new RuntimeException(e);
-    }
-}
 
-@Override
-public void delete(int categoryId)
-{
-    // delete category
-    String query = """
+    @Override
+    public void delete(int categoryId)
+    {
+        // delete category
+        String query = """
                 DELETE FROM categories
                 WHERE category_id = ?""";
 
-    try (Connection connection = getConnection())
-    {
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, categoryId);
+        try (Connection connection = getConnection())
+        {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, categoryId);
 
-        statement.executeUpdate();
+            statement.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
-    catch (SQLException e)
+
+    private Category mapRow(ResultSet row) throws SQLException
     {
-        throw new RuntimeException(e);
+        int categoryId = row.getInt("category_id");
+        String name = row.getString("name");
+        String description = row.getString("description");
+
+        Category category = new Category()
+        {{
+            setCategoryId(categoryId);
+            setName(name);
+            setDescription(description);
+        }};
+
+        return category;
     }
-}
-
-private Category mapRow(ResultSet row) throws SQLException
-{
-    int categoryId = row.getInt("category_id");
-    String name = row.getString("name");
-    String description = row.getString("description");
-
-    Category category = new Category()
-    {{
-        setCategoryId(categoryId);
-        setName(name);
-        setDescription(description);
-    }};
-
-    return category;
-}
 
 }
