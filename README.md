@@ -28,8 +28,6 @@ Before final deployment, the project required fixing major bugs and implementing
 
 - CRUD operations for categories
 - Shopping cart logic tied to authenticated users
-- User profile management endpoints
-- Full JWT authentication for secure routes
 
 ---
 
