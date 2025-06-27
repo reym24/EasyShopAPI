@@ -1,4 +1,4 @@
-package org.yearup.models;
+package org.yearup.models;More actions
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.yearup.models.authentication.Authority;
@@ -112,13 +112,13 @@ public class User {
    @JsonIgnore
    public String getRole()
    {
-      if(authorities.size() > 0)
-      {
-         for(Authority role: authorities)
+         if(!authorities.isEmpty())
          {
-            return role.getName().toUpperCase();
+            for(Authority role: authorities)
+            {
+               return role.getName().toUpperCase();
+            }
          }
-      }
 
       return "ROLE_USER";
    }
