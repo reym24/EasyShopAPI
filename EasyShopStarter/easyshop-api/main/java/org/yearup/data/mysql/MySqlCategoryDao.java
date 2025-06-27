@@ -5,10 +5,7 @@ import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,28 +87,25 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
         // create a new category
 
         String query = """
-                insert into categories
-                (category_id, name, description)
-                values
-                (1, ?, ?)""";
+                INSERT INTO categories (name, description)
+                VALUES (?, ?)
+                """;
 
-        try(
+        try (
                 Connection connection = getConnection();
-                PreparedStatement ps = connection.prepareStatement(query);
+                PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            ps.setInt(1, category.getCategoryId());
-            ps.setString(2, category.getName());
-            ps.setString(3, category.getDescription());
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
 
-            // get back num of rows
-            int rows = ps.executeUpdate();
-            try(ResultSet resultSet = ps.getGeneratedKeys()) {
-                while (resultSet.next()) {
+            ps.executeUpdate();
+
+            try (ResultSet resultSet = ps.getGeneratedKeys()) {
+                if (resultSet.next()) {
                     Category result = new Category();
-                    result.setCategoryId(resultSet.getInt(1));
+                    result.setCategoryId(resultSet.getInt(1)); // Auto-generated ID
                     result.setName(category.getName());
                     result.setDescription(category.getDescription());
-
                     return result;
                 }
             }
@@ -126,7 +120,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public void update(int categoryId, Category category)
     {
         // update category
-        String sql = """
+        String query = """
                 UPDATE categories
                 SET name = ?
                   , description = ?
@@ -135,7 +129,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 
         try (Connection connection = getConnection())
         {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, category.getCategoryId());
             ps.setString(2, category.getName());
             ps.setString(3, category.getDescription());
@@ -154,13 +148,15 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
         // delete category
         String query = """
                 DELETE FROM categories
-                WHERE category_id = ?""";
+                WHERE category_id = ?
+                """;
 
-        try (Connection connection = getConnection())
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)
+        )
         {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setInt(1, categoryId);
 
+            statement.setInt(1, categoryId);
             statement.executeUpdate();
         }
         catch (SQLException e)

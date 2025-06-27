@@ -51,13 +51,14 @@ public class CategoriesController
     @PreAuthorize("permitAll()")
     public Category getById(@PathVariable int id)
     {
-        // get the category by id
-        try {
-            return categoryDao.getById(id);
-        } catch(Exception ex)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+
+        Category category = categoryDao.getById(id);
+
+        if(category == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+
+        return category;
     }
 
     // the url to return all products in category 1 would look like this
@@ -79,6 +80,7 @@ public class CategoriesController
     // add annotation to ensure that only an ADMIN can call this function
     @PostMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     public Category addCategory(@RequestBody Category category)
     {
         // insert the category
@@ -114,6 +116,7 @@ public class CategoriesController
     // add annotation to ensure that only an ADMIN can call this function
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable int id)
     {
         // delete the category by id

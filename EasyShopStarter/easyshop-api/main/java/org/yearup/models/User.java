@@ -112,13 +112,13 @@ public class User {
    @JsonIgnore
    public String getRole()
    {
-         if(!authorities.isEmpty())
+      if(!authorities.isEmpty())
+      {
+         for(Authority role: authorities)
          {
-            for(Authority role: authorities)
-            {
-               return role.getName().toUpperCase();
-            }
+            return role.getName().toUpperCase();
          }
+      }
 
       return "ROLE_USER";
    }
