@@ -168,14 +168,6 @@ Steps:
 
 ---
 
-## 🖼️ Screenshots
-
-### ✔️ Postman Collection
-
-![Postman Tests Screenshot](screenshots/postman-tests.png)
-
----
-
 ## 📈 Next Steps
 
 A potential future addition is **checkout functionality**, including order finalization and payment integration.
