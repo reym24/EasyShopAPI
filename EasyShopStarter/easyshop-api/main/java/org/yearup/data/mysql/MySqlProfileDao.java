@@ -17,7 +17,7 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
     }
 
     @Override
-    public Profile getById(int profileId)
+    public Profile getByUserId(int profileId)
     {
         return null;
     }
