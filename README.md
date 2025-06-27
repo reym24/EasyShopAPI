@@ -59,50 +59,6 @@ http://localhost:8080
 
 ---
 
-## 🔐 Authentication
-
-EasyShop uses JWT-based authentication.
-
-### Register
-
-```http
-POST /register
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "password",
-  "confirmPassword": "password",
-  "role": "ADMIN"
-}
-```
-
-### Login
-
-```http
-POST /login
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "password"
-}
-```
-
-Save the token from the response and include it in requests:
-
-```
-Authorization: Bearer <your_token_here>
-```
-
-**Default credentials:**
-
-- Username: `user`, `admin`, `george`
-- Password: `password`
-
----
-
-## 📁 API Endpoints
 
 ### 🗂️ Categories
 
