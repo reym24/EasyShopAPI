@@ -1,4 +1,4 @@
-package org.yearup.data;More actions
+package org.yearup.data;
 
 import org.yearup.models.Category;
 import org.yearup.models.Product;

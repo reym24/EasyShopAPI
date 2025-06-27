@@ -1,4 +1,4 @@
-package org.yearup.data.mysql;More actions
+package org.yearup.data.mysql;
 
 import org.springframework.stereotype.Component;
 import org.yearup.data.CategoryDao;

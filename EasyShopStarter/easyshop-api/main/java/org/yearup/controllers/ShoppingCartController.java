@@ -1,4 +1,4 @@
-package org.yearup.controllers;More actions
+package org.yearup.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;

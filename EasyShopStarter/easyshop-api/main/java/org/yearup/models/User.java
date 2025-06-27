@@ -1,4 +1,4 @@
-package org.yearup.models;More actions
+package org.yearup.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.yearup.models.authentication.Authority;
