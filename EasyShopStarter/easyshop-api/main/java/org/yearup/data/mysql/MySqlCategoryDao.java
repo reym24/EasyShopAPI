@@ -24,7 +24,6 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public List<Category> getAllCategories()
     {
         // get all categories
-        return null;
         List<Category> categories = new ArrayList<>();
 
         String query = """
@@ -56,46 +55,135 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public Category getById(int categoryId)
     {
         // get category by id
+        String query = """
+                select
+                categoryId,
+                categoryName
+                from
+                categories
+                where categoryId = ?
+                """;
 
+        try(
+                Connection connection = getConnection();
+                PreparedStatement ps = connection.prepareStatement(query);
+        ) {
+            ps.setInt(1, categoryId);
+            try(ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()){
+                    String categoryName = resultSet.getString(2);
+                    String description = resultSet.getString(3);
+                    Category c = new Category(categoryId, categoryName, description);
+                    return c;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
+}
 
-    @Override
-    public Category create(Category category)
-    {
-        // create a new category
+@Override
+public Category create(Category category)
+{
+    // create a new category
 
-        return null;
+    String query = """
+                insert into categories
+                (category_id, name, description)
+                values
+                (1, ?, ?)""";
+
+    try(
+            Connection connection = getConnection();
+            PreparedStatement ps = connection.prepareStatement(query);
+    ) {
+        ps.setInt(1, category.getCategoryId());
+        ps.setString(2, category.getName());
+        ps.setString(3, category.getDescription());
+
+        // get back num of rows
+        int rows = ps.executeUpdate();
+        try(ResultSet resultSet = ps.getGeneratedKeys()) {
+            while (resultSet.next()) {
+                Category result = new Category();
+                result.setCategoryId(resultSet.getInt(1));
+                result.setName(category.getName());
+                result.setDescription(category.getDescription());
+
+                return result;
+            }
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
     }
 
-    @Override
-    public void update(int categoryId, Category category)
+    return null;
+}
+
+@Override
+public void update(int categoryId, Category category)
+{
+    // update category
+    String sql = """
+                UPDATE categories
+                SET name = ?
+                  , description = ?
+                WHERE category_id = ?
+                """;
+
+    try (Connection connection = getConnection())
     {
-        // update category
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, category.getCategoryId());
+        ps.setString(2, category.getName());
+        ps.setString(3, category.getDescription());
 
+        ps.executeUpdate();
     }
-
-    @Override
-    public void delete(int categoryId)
+    catch (SQLException e)
     {
-        // delete category
-
+        throw new RuntimeException(e);
     }
+}
 
-    private Category mapRow(ResultSet row) throws SQLException
+@Override
+public void delete(int categoryId)
+{
+    // delete category
+    String query = """
+                DELETE FROM categories
+                WHERE category_id = ?""";
+
+    try (Connection connection = getConnection())
     {
-        int categoryId = row.getInt("category_id");
-        String name = row.getString("name");
-        String description = row.getString("description");
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1, categoryId);
 
-        Category category = new Category()
-        {{
-            setCategoryId(categoryId);
-            setName(name);
-            setDescription(description);
-        }};
-
-        return category;
+        statement.executeUpdate();
     }
+    catch (SQLException e)
+    {
+        throw new RuntimeException(e);
+    }
+}
+
+private Category mapRow(ResultSet row) throws SQLException
+{
+    int categoryId = row.getInt("category_id");
+    String name = row.getString("name");
+    String description = row.getString("description");
+
+    Category category = new Category()
+    {{
+        setCategoryId(categoryId);
+        setName(name);
+        setDescription(description);
+    }};
+
+    return category;
+}
 
 }

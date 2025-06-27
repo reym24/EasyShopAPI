@@ -1,4 +1,4 @@
-package org.yearup.controllers;Add commentMore actions
+package org.yearup.controllers;More actions
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,7 +52,12 @@ public class CategoriesController
     public Category getById(@PathVariable int id)
     {
         // get the category by id
-        return null;
+        try {
+            return categoryDao.getById(id);
+        } catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 
     // the url to return all products in category 1 would look like this
@@ -62,7 +67,12 @@ public class CategoriesController
     public List<Product> getProductsById(@PathVariable int categoryId)
     {
         // get a list of product by categoryId
-        return null;
+        try {
+            return productDao.listByCategoryId(categoryId);
+        } catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 
     // add annotation to call this method for a POST action
@@ -91,7 +101,7 @@ public class CategoriesController
         // update the category by id
         try
         {
-            categoryDao.create(category);
+            categoryDao.update(id, category);
         }
         catch(Exception ex)
         {
